@@ -52,9 +52,6 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             @endif
-
-
-
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
@@ -78,7 +75,7 @@
                             </td>
 
                             <td>{{ $data->nama_produk ?? '-' }}</td>
-                            <td>{{ $data->harga_jual ?? '-' }}</td>
+                            <td>{{ number_format($data->harga_jual, 0, ',', '.') ?? '-' }}</td>
                             <td>{{ $data->stok ?? '-' }}</td>
                             <td class="d-flex justify-content-center align-items-center" style="height: 100%;">
                                 <form id="delete-form-{{ $data->id }}" action="{{ route('destroy.produk', $data->id) }}" method="POST" enctype="multipart/form-data">

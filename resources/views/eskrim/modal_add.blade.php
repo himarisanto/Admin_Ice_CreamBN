@@ -40,7 +40,7 @@
                                 <label for="harga_beli" class="form-label"><strong>Harga Beli : </strong></label>
                                 <div class="input-group input-group-alternative">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="number" class="form-control" id="harga_beli" name="harga_beli" required>
+                                    <input type="text" class="form-control" id="harga_beli" name="harga_beli" oninput="formatCurrency(this)" required>
                                 </div>
                             </div>
                             <div class="mb-1">
@@ -85,5 +85,20 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
+    function formatCurrency(input) {
+        // Get input value
+        let value = input.value;
+
+        // Remove existing commas and non-numeric characters
+        value = value.replace(/[^0-9]/g, '');
+
+        // Format with commas for thousands and above
+        value = new Intl.NumberFormat('id-ID').format(value);
+
+        // Set formatted value back to input
+        input.value = value;
+    }
+
+
 </script>
 @include('eskrim.add_satuan')
