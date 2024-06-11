@@ -8,10 +8,12 @@
                         <div class="col-xl-4">
                             <div class="mb-3">
                                 <label for="gambar_produk" class="form-label"><strong>Gambar Produk : </strong></label>
-                                <input type="file" class="form-control" id="gambar_produk" name="gambar_produk" onchange="lihaImage()">
+                                <input type="file" class="form-control" id="gambar_produk" name="gambar_produk"
+                                    onchange="lihaImage()">
                             </div>
                             <div class="mt-3">
-                                <img src="#" id="preview1" style="max-width: 100%; height: auto; display: none;" alt="Preview Gambar">
+                                <img src="#" id="preview1" style="max-width: 100%; height: auto; display: none;"
+                                    alt="Preview Gambar">
                             </div><br>
                         </div>
                         <div class="col-xl-8">
@@ -29,27 +31,31 @@
                                     <select class="form-select flex-grow-1" id="satuan_id" name="satuan_id">
                                         <option selected disabled value="">Pilih Satuan</option>
                                         @foreach ($satuans as $data)
-                                        <option value="{{ $data->id }}">{{ $data->nama_satuan ?? '-' }}
-                                        </option>
+                                            <option value="{{ $data->id }}">{{ $data->nama_satuan ?? '-' }}
+                                            </option>
                                         @endforeach
                                     </select>
-                                    <span class="ms-2" id="PlusSatuan"><i class="ri-add-circle-fill text-success"></i></span>
+                                    <span class="ms-2" id="PlusSatuan"><i
+                                            class="ri-add-circle-fill text-success"></i></span>
                                 </div>
                             </div>
                             <div class="mb-1">
                                 <label for="harga_beli" class="form-label"><strong>Harga Beli : </strong></label>
                                 <div class="input-group input-group-alternative">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="text" class="form-control" id="harga_beli" name="harga_beli" oninput="formatCurrency(this)" required>
+                                    <input type="text" class="form-control" id="harga_beli" name="harga_beli"
+                                        oninput="formatCurrency2(this)" required>
                                 </div>
                             </div>
                             <div class="mb-1">
                                 <label for="harga_jual" class="form-label"><strong>Harga Jual : </strong></label>
                                 <div class="input-group input-group-alternative">
                                     <span class="input-group-text">Rp</span>
-                                    <input type="number" class="form-control" id="harga_jual" name="harga_jual" required>
+                                    <input type="text" class="form-control" id="harga_jual" name="harga_jual"
+                                        oninput="formatCurrency2(this)" require d>
                                 </div>
                             </div>
+
                             <div class="mb-1">
                                 <label for="keterangan" class="form-label"><strong>Keterangan : </strong></label>
                                 <textarea class="form-control" name="keterangan" id="keterangan"></textarea>
@@ -85,20 +91,25 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
-    function formatCurrency(input) {
-        // Get input value
+
+    function formatCurrency2(input) {
         let value = input.value;
 
-        // Remove existing commas and non-numeric characters
-        value = value.replace(/[^0-9]/g, '');
+        // Remove all non-numeric characters except for comma and dot
+        value = value.replace(/[^\d,]/g, '');
 
-        // Format with commas for thousands and above
-        value = new Intl.NumberFormat('id-ID').format(value);
+        // Replace comma with dot if used as decimal separator
+        if (value.includes(',')) {
+            value = value.replace(',', '.');
+        }
 
-        // Set formatted value back to input
-        input.value = value;
+        let parts = value.split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+        // Rejoin the parts with a comma if there's a decimal part
+        input.value = parts.length > 1 ? parts.join(',') : parts[0];
     }
 
-
 </script>
+
 @include('eskrim.add_satuan')

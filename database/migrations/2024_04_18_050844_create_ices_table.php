@@ -17,8 +17,13 @@ return new class extends Migration
             $table->string('gambar_produk')->nullable();
             $table->string('nama_produk');
             $table->unsignedBigInteger('satuan_id')->nullable();
-            $table->unsignedBigInteger('harga_beli');
-            $table->unsignedBigInteger('harga_jual');
+            // $table->unsigne('harga_beli');
+            $table->unsignedFloat("harga_beli");
+            // $table->unsignedBigInteger('harga_jual');
+            // $table->decimal('harga_jual',15,2)->unsigned()->default(0)->change();
+            $table->unsignedFloat("harga_jual");
+
+
             $table->unsignedBigInteger('stok')->default(0);
             $table->string('keterangan')->nullable();
             $table->timestamps();

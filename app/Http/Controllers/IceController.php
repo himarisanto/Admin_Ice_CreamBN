@@ -12,6 +12,7 @@ class IceController extends Controller
 {
     public function index(Request $request)
     {
+
         // Reset filter
         if ($request->has('reset_filter') && $request->reset_filter == '1') {
             // Hapus filter yang disimpan dalam sesi
@@ -36,7 +37,7 @@ class IceController extends Controller
 
         if ($searchKeyword) {
             $icesQuery->where('kode_produk', 'LIKE', "%$searchKeyword%")
-            ->orWhere('nama_produk', 'LIKE', "%$searchKeyword%");
+                ->orWhere('nama_produk', 'LIKE', "%$searchKeyword%");
         }
 
         // Ambil hasil pencarian
@@ -49,66 +50,64 @@ class IceController extends Controller
         if (!$hasResults && $searchKeyword) {
             $searchMessage = "Tidak ada hasil pencarian dari '$searchKeyword'.";
         }
+        // dd($ices->get());
 
         $satuans = Satuan::all();
         return view('eskrim.index', compact('ices', 'satuans', 'searchKeyword', 'hasResults', 'searchMessage', 'entries'));
+
     }
-
-
-
-
-
-
-
     public function store(Request $req)
     {
         $req->validate([
             'kode_produk' => 'required|string',
             'gambar_produk' => 'file|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'nama_produk'   => 'required|string',
-            'satuan_id'    => 'numeric|nullable', // tambahkan exists untuk memeriksa apakah satuan_id ada di database
-            'harga_beli'    => 'required|numeric',
-            'harga_jual'    => 'required|numeric',
-            'keterangan'    => 'nullable|string|max:255', // tambahkan max untuk membatasi panjang keterangan
+            'satuan_id'    => 'numeric|nullable',
+            'harga_beli'    => 'required|string',
+            'harga_jual'    => 'required|string',
+            'keterangan'    => 'nullable|string|max:255',
         ]);
+
         $existingKode = Ice::where('kode_produk', $req->kode_produk)->exists();
 
         if ($existingKode) {
             return redirect()->back()->with('warning', 'Kode produk ' . $req->kode_produk . ' sudah ada.');
         }
 
-
-
-        // Inisialisasi variabel $gambarproduk
         $gambarproduk = null;
 
-        // Periksa apakah gambar diunggah
         if ($req->hasFile('gambar_produk')) {
             $gambarbarang = $req->file('gambar_produk');
-            $name = time() . '_' . $gambarbarang->getClientOriginalName(); // Nama file unik
+            $name = time() . '_' . $gambarbarang->getClientOriginalName();
             $destinationPath = public_path('/gambar_produk');
             if ($gambarbarang->move($destinationPath, $name)) {
-                $gambarproduk = $name; // atur nilai gambarproduk jika gambar berhasil diunggah
+                $gambarproduk = $name;
             }
         }
 
-        // Mengubah huruf awal dari nama_produk menjadi huruf besar
         $namaProduk = ucfirst($req['nama_produk']);
 
-        // Simpan data ke database
+        // Membersihkan format harga beli dan harga jual
+        $hargaBeli = str_replace(",", ".", str_replace('.', '', $req['harga_beli']));
+        // dd((float) $hargaBeli);
+        // dd( $hargaBeli);
+        $hargaJual = str_replace(",", ".", str_replace('.', '', $req['harga_jual']));
+
+        // $hargaJual = str_replace('.', '', $req['harga_jual']);
+
         Ice::create([
             'kode_produk'   => $req['kode_produk'],
-            'gambar_produk' => $gambarproduk, // Gunakan $gambarproduk yang sudah diperiksa
+            'gambar_produk' => $gambarproduk,
             'nama_produk'   => $namaProduk,
             'satuan_id'    => $req['satuan_id'],
-            'harga_beli'    => $req['harga_beli'],
-            'harga_jual'    => $req['harga_jual'],
+            'harga_beli'    => $hargaBeli,
+            'harga_jual'    => $hargaJual,
             'keterangan'    => $req['keterangan'],
         ]);
 
-        // Redirect atau lakukan sesuatu setelah penyimpanan
         return redirect()->back()->with('message', 'Data produk berhasil disimpan.');
     }
+
 
     public function update(Request $req, $id)
     {
@@ -116,15 +115,14 @@ class IceController extends Controller
             'kode_produk' => 'required|string',
             'gambar_produk' => 'file|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'nama_produk'   => 'required|string',
-            'satuan_id'    => 'numeric|nullable|exists:satuans,id', // tambahkan exists untuk memeriksa apakah satuan_id ada di database
-            'harga_beli'    => 'required|numeric',
-            'harga_jual'    => 'required|numeric',
-            'keterangan'    => 'nullable|string|max:255', // tambahkan max untuk membatasi panjang keterangan
+            'satuan_id'    => 'numeric|nullable|exists:satuans,id',
+            'harga_beli'    => 'required|string',
+            'harga_jual'    => 'required|string',
+            'keterangan'    => 'nullable|string|max:255',
         ]);
 
-        // Temukan data produk berdasarkan ID
         $ice = Ice::find($id);
-        // Periksa apakah ada produk lain dengan kode yang sama kecuali untuk produk yang sedang diperbarui
+
         $existingKode = Ice::where('kode_produk', $req->kode_produk)
             ->where('id', '!=', $id)
             ->exists();
@@ -136,40 +134,38 @@ class IceController extends Controller
             return redirect()->back()->withErrors(['message' => 'Data produk tidak ditemukan.'])->withInput();
         }
 
-        // Inisialisasi variabel $gambarproduk
         $gambarproduk = $ice->gambar_produk;
 
-        // Periksa apakah gambar baru diunggah
         if ($req->hasFile('gambar_produk')) {
             $gambarbarang = $req->file('gambar_produk');
-            $name = time() . '_' . $gambarbarang->getClientOriginalName(); // Nama file unik
+            $name = time() . '_' . $gambarbarang->getClientOriginalName();
             $destinationPath = public_path('/gambar_produk');
             if ($gambarbarang->move($destinationPath, $name)) {
-                // Hapus gambar lama jika ada
                 if (File::exists(public_path('gambar_produk/' . $gambarproduk))) {
                     File::delete(public_path('gambar_produk/' . $gambarproduk));
                 }
-                $gambarproduk = $name; // atur nilai gambarproduk jika gambar berhasil diunggah
+                $gambarproduk = $name;
             }
         }
 
-        // Mengubah huruf awal dari nama_produk menjadi huruf besar
         $namaProduk = ucfirst($req['nama_produk']);
 
-        // Update data produk
+        $hargaBeli = str_replace('.', '', $req['harga_beli']);
+        $hargaJual = str_replace('.', '', $req['harga_jual']);
+
         $ice->update([
             'kode_produk'   => $req['kode_produk'],
-            'gambar_produk' => $gambarproduk, // Gunakan $gambarproduk yang sudah diperiksa
+            'gambar_produk' => $gambarproduk,
             'nama_produk'   => $namaProduk,
             'satuan_id'    => $req['satuan_id'],
-            'harga_beli'    => $req['harga_beli'],
-            'harga_jual'    => $req['harga_jual'],
+            'harga_beli'    => (int)$hargaBeli,
+            'harga_jual'    => (int)$hargaJual,
             'keterangan'    => $req['keterangan'],
         ]);
 
-        // Redirect atau lakukan sesuatu setelah update
         return redirect()->back()->with('message', 'Data produk berhasil diperbarui.');
     }
+
 
     function destroy($id)
     {

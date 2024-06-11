@@ -15,22 +15,26 @@
                     <ul class="nav nav-pills nav-fill p-1" role="tablist">
                         <li class="nav-item">
                             <select class="form-control" name="entri" aria-placeholder="pilih jumlah">
-                                <option value="10" {{ request('entri') == '10' ? 'selected' : '' }}>10</option>
-                                <option value="25" {{ request('entri') == '25' ? 'selected' : '' }}>25</option>
-                                <option value="50" {{ request('entri') == '50' ? 'selected' : '' }}>50</option>
-                                <option value="100" {{ request('entri') == '100' ? 'selected' : '' }}>100</option>
-                                <option value="all" {{ request('entri') == 'all' ? 'selected' : '' }}>Semua</option>
+                                <option value="10" {{ request('entri')=='10' ? 'selected' : '' }}>10</option>
+                                <option value="25" {{ request('entri')=='25' ? 'selected' : '' }}>25</option>
+                                <option value="50" {{ request('entri')=='50' ? 'selected' : '' }}>50</option>
+                                <option value="100" {{ request('entri')=='100' ? 'selected' : '' }}>100</option>
+                                <option value="all" {{ request('entri')=='all' ? 'selected' : '' }}>Semua</option>
                             </select>
                         </li>&nbsp;
                         <li class="nav-item">
-                            <input type="text" class="form-control" name="search" placeholder="search..." value="{{ request('search') }}">
+                            <input type="text" class="form-control" name="search" placeholder="search..."
+                                value="{{ request('search') }}">
                         </li>&nbsp;
                         <li class="nav-item">
-                            <button type="submit" class="btn btn-success w-100"><i class="ri-search-eye-line"></i></button>
+                            <button type="submit" class="btn btn-success w-100"><i
+                                    class="ri-search-eye-line"></i></button>
                         </li>&nbsp;
                         <li class="nav-item">
                             <input type="hidden" name="reset_filter" id="reset_filter" value="0">
-                            <button type="submit" class="btn btn-danger w-100" onclick="resetFilter()" data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Filter"><i class="ri-filter-off-line"></i></button>
+                            <button type="submit" class="btn btn-danger w-100" onclick="resetFilter()"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Reset Filter"><i
+                                    class="ri-filter-off-line"></i></button>
                         </li>
                     </ul>
                 </form>
@@ -47,11 +51,16 @@
                 </div>
             </div>
             @if (!empty($searchMessage))
-            <div class="alert alert-secondary bg-secondary text-light border-0 alert-dismissible fade show" role="alert">
+            <div class="alert alert-secondary bg-secondary text-light border-0 alert-dismissible fade show"
+                role="alert">
                 {{ $searchMessage }}
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
+                    aria-label="Close"></button>
             </div>
             @endif
+
+
+
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>
@@ -68,26 +77,38 @@
                     <tbody>
                         @forelse ($ices as $key => $data)
                         <tr>
-                            <th scope="row">{{ $loop->iteration }} <input class="form-check-input" type="checkbox" name="selected_ices[]" value="{{ $data->id }}"></th>
+                            <th scope="row">{{ $loop->iteration }} <input class="form-check-input" type="checkbox"
+                                    name="selected_ices[]" value="{{ $data->id }}"></th>
                             <td>{{ $data->kode_produk ?? '-' }}</td>
                             <td class="text-center">
-                                <img width="30px" height="30px" src="{{ asset('gambar_produk/' . $data->gambar_produk ?? '') }}" alt="Preview Gambar">
+                                <img width="30px" height="30px"
+                                    src="{{ asset('gambar_produk/' . $data->gambar_produk ?? '') }}"
+                                    alt="Preview Gambar">
                             </td>
 
                             <td>{{ $data->nama_produk ?? '-' }}</td>
-                            <td>{{ number_format($data->harga_jual, 0, ',', '.') ?? '-' }}</td>
+                            <td>{{ number_format($data->harga_jual, 0, ',', '.') }}</td>
+                            {{-- <td>{{ number_format($data->harga_beli, 0, ',', '.') }}</td> --}}
                             <td>{{ $data->stok ?? '-' }}</td>
                             <td class="d-flex justify-content-center align-items-center" style="height: 100%;">
-                                <form id="delete-form-{{ $data->id }}" action="{{ route('destroy.produk', $data->id) }}" method="POST" enctype="multipart/form-data">
+                                <form id="delete-form-{{ $data->id }}" action="{{ route('destroy.produk', $data->id) }}"
+                                    method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" onclick="deleteConfirmation('{{ $data->id }}', '{{ $data->nama_produk }}')" class="btn btn-danger delete-row"><i class="ri-delete-bin-6-fill"></i></button>&nbsp;
+                                    <button type="button"
+                                        onclick="deleteConfirmation('{{ $data->id }}', '{{ $data->nama_produk }}')"
+                                        class="btn btn-danger delete-row"><i
+                                            class="ri-delete-bin-6-fill"></i></button>&nbsp;
                                 </form>
                                 <form action="#">
-                                    <button class="btn btn-success" type="button" data-bs-toggle="modal" data-bs-target="#Mdl_edit_es-{{ $data->id }}"><i class="ri-edit-2-fill"></i></button>&nbsp;
+                                    <button class="btn btn-success" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#Mdl_edit_es-{{ $data->id }}"><i
+                                            class="ri-edit-2-fill"></i></button>&nbsp;
                                 </form>
                                 <form action="#">
-                                    <button class="btn btn-info" type="button" data-bs-toggle="modal" data-bs-target="#Mdl_detail_es-{{ $data->id }}"><i class="ri-eye-fill text-white"></i></button>
+                                    <button class="btn btn-info" type="button" data-bs-toggle="modal"
+                                        data-bs-target="#Mdl_detail_es-{{ $data->id }}"><i
+                                            class="ri-eye-fill text-white"></i></button>
                                 </form>
                             </td>
                         </tr>
@@ -102,10 +123,12 @@
 
             <div class="row align-items-center mt-2 mb-2">
                 <div class="col d-flex">
-                    <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal" data-bs-target="#Mdl_tambah_es">
+                    <button class="btn btn-primary me-2" type="button" data-bs-toggle="modal"
+                        data-bs-target="#Mdl_tambah_es">
                         <i class="ri-add-circle-line"></i>
                     </button>
-                    <form action="{{ route('ice.hapus_terpilih') }}" method="POST" enctype="multipart/form-data" id="delete-selected-form">
+                    <form action="{{ route('ice.hapus_terpilih') }}" method="POST" enctype="multipart/form-data"
+                        id="delete-selected-form">
                         @csrf
                         <button class="btn btn-danger" type="button" id="btn-hapus-terpilih">
                             <i class="ri-delete-bin-6-fill"></i> Hapus Terpilih
