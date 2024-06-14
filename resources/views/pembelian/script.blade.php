@@ -13,9 +13,10 @@
             var kodeProduk = selectedOption.val();
             var namaProduk = selectedOption.data('nama-produk');
             var hargaBeli = selectedOption.data('harga-beli');
+            var originalHargaBeli = selectedOption.data(
+                'original-harga-beli'); //paggil bilangan hargabeli
             var gambar = selectedOption.data('gambar');
             var stok = selectedOption.data('stok-produk');
-
             // Menambahkan baris baru ke dalam tabel dengan data yang sesuai
             var newRow = `
             <tr data-kode-barang="${kodeProduk}">
@@ -31,10 +32,10 @@
                         </div>
                     </div>
                 </td>
-                <td class="align-middle text-center text-sm">
+               <td class="align-middle text-center text-sm">
                     <div class="input-group">
                         <span class="input-group-text" id="basic-addon1">Rp</span>
-                        <input required type="text" class="form-control harga_beli" name="harga_beli[]" value=${hargaBeli}>
+                        <input required type="text" class="form-control harga_beli" name="harga_beli[]" value="${originalHargaBeli}"> <!-- Use original price -->
                     </div>
                 </td>
                 <td class="align-middle text-center text-sm">
@@ -60,12 +61,27 @@
         });
 
         function formatRupiah(angka) {
-            var reverse = angka.toString().split('').reverse().join('');
-            var ribuan = reverse.match(/\d{1,3}/g);
-            var formatted = ribuan.join('.').split('').reverse().join('');
-            return "Rp " + formatted;
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(angka);
         }
 
+        function calculateTotalPrice(jumlahMasuk, hargaBeli) {
+            return jumlahMasuk * hargaBeli;
+        }
+
+        function updateTotalAndPayment(totalHarga, pembayaran) {
+            $('#totalHarga').text(formatRupiah(totalHarga));
+            $('#pembayaran').val(formatRupiah(pembayaran));
+
+            // Menghitung kembalian
+            const kembalian = pembayaran - totalHarga;
+            $('#kembalian').text(formatRupiah(kembalian));
+
+            // Mengaktifkan atau menonaktifkan tombol submit berdasarkan kembalian
+            $('#submitBtn').prop('disabled', kembalian < 0);
+        }
         $(document).on('input', '.harga_beli', function() {
             var harga_beli = parseFloat($(this).val());
             var jumlah_masuk = parseFloat($(this).closest('tr').find('.jumlah_masuk').val());
@@ -80,10 +96,42 @@
             // Perbarui total harga setiap kali nilai total harga berubah
             updateTotalHarga();
         });
+        $(document).on('input', '.jumlah_masuk', function() {
+            var jumlah_masuk = parseFloat($(this).val());
+            var harga_beli = parseFloat($(this).closest('tr').find('.harga_beli').val());
 
+            // Menghitung total harga per produk
+            var total_harga_produk = jumlah_masuk * harga_beli;
+
+            // Mengubah total harga produk menjadi format mata uang Rupiah
+            var formatted_total_harga_produk = formatRupiah(total_harga_produk);
+
+            // Memperbarui tampilan total harga per produk
+            $(this).closest('tr').find('.total_harga').text(formatted_total_harga_produk);
+
+            // Hitung total harga keseluruhan
+            var total_harga_keseluruhan = 0;
+            $('#listproduk tbody tr').each(function() {
+                var total_harga_per_produk = parseFloat($(this).find('.total_harga_input')
+                    .val());
+                total_harga_keseluruhan += total_harga_per_produk;
+            });
+            // Memperbarui tampilan total harga keseluruhan
+            $('#totalHarga').text(formatRupiah(total_harga_keseluruhan));
+            $('#grandhargaInput').val(total_harga_keseluruhan);
+        });
+
+        // Fungsi yang dijalankan saat dokumen dimuat
+        // $(document).ready(function() {
+        //     // Panggil event listener untuk memperbarui total harga dan pembayaran saat halaman dimuat
+        //     const totalHarga = parseFloat($('#totalHarga').text().replace('Rp ', '').replace('.', ''));
+        //     const pembayaran = parseFloat($('#pembayaran').val().replace('Rp ', '').replace('.', ''));
+        //     updateTotalAndPayment(totalHarga, pembayaran);
+        // });
         $(document).on('input', '.jumlah_masuk, .bonus', function() {
             var jumlah_masuk = parseFloat($(this).closest('tr').find('.jumlah_masuk').val());
-            var bonus = parseFloat($(this).closest('tr').find('.bonus').val() || 0); // Mengambil nilai bonus, atau 0 jika kosong
+            var bonus = parseFloat($(this).closest('tr').find('.bonus').val() ||
+                0); // Mengambil nilai bonus, atau 0 jika kosong
             var stok = parseFloat($(this).closest('tr').find('.stok').text().replace('Stok : ', ''));
             var harga_beli = parseFloat($(this).closest('tr').find('.harga_beli').val());
 
@@ -96,7 +144,8 @@
             $(this).closest('tr').find('.total_harga').text(formatted_total_harga);
             $(this).closest('tr').find('.total_stok').text("Total Stok : " + total_stok);
             $(this).closest('tr').find('.total_harga_input').val(total_harga);
-            $(this).closest('tr').find('.kode_produk_input').val($(this).closest('tr').data('kode-barang'));
+            $(this).closest('tr').find('.kode_produk_input').val($(this).closest('tr').data(
+                'kode-barang'));
 
             // Menghitung total jumlah masuk dari semua input
             var totalJumlahMasuk = 0;
@@ -111,8 +160,6 @@
                 bonus = isNaN(bonus) ? 0 : bonus;
                 totalJumlahBonus += bonus;
             });
-
-
             // Memasukkan nilai totalJumlahMasuk ke input dengan id total_produk
             $('#total_produk').val(totalJumlahMasuk);
             $('#total_bonus').val(totalJumlahBonus);
@@ -120,9 +167,6 @@
             // Perbarui total harga setiap kali nilai total harga berubah
             updateTotalHarga();
         });
-
-
-
         // Menangani klik pada tombol "Hapus Baris"
         $('#listproduk tbody').on('click', '.hapus-baris', function() {
             // Mengaktifkan kembali opsi yang dihapus dari tabel
@@ -141,32 +185,28 @@
 
             // Loop melalui setiap baris dan menambahkan nilai total harga dari masing-masing baris
             $('#listproduk tbody tr').each(function() {
-                // Mendapatkan nilai total harga baris
-                var total_harga_baris_text = $(this).find('.total_harga_input').val();
+                // Mendapatkan nilai jumlah_masuk dan harga_beli
+                var jumlah_masuk = parseFloat($(this).find('.jumlah_masuk').val());
+                var harga_beli = parseFloat($(this).find('.harga_beli').val());
 
-                // Mengonversi teks total harga baris menjadi angka
-                var total_harga_baris = parseFloat(total_harga_baris_text.replace('Rp ', '').replace(',', ''));
+                // Menghitung total harga per barang
+                var total_harga_barang = jumlah_masuk * harga_beli;
 
-                // Memastikan nilai total_harga_baris adalah angka yang valid, jika tidak, gunakan nilai 0
-                total_harga_baris = isNaN(total_harga_baris) ? 0 : total_harga_baris;
-
-                // Menambahkan nilai total harga baris ke totalHarga
-                totalHarga += total_harga_baris;
+                // Menambahkan total harga per barang ke totalHarga
+                totalHarga += total_harga_barang;
             });
 
             // Perbarui tampilan total harga
             $('#totalHarga').text(formatRupiah(totalHarga));
             $('#grandhargaInput').val(totalHarga);
         }
-
-
-
         // Event listener untuk perubahan nilai pada input pembayaran
         $('#pembayaran').on('input', function() {
             // Mendapatkan nilai total harga dari elemen dengan id totalHarga
             var totalHargaText = $('#totalHarga').text();
             // Menghilangkan 'Rp ' dan mengubah ',' menjadi '' untuk mendapatkan angka total harga
-            var totalHarga = parseFloat(totalHargaText.replace('Rp ', '').replace(/[^0-9,-]+/g, '').replace(/,/g, '.'));
+            var totalHarga = parseFloat(totalHargaText.replace('Rp ', '').replace(/[^0-9,-]+/g, '')
+                .replace(/,/g, ','));
 
             // Pastikan nilai total harga adalah angka yang valid, jika tidak, gunakan nilai 0
             totalHarga = isNaN(totalHarga) ? 0 : totalHarga;
@@ -208,9 +248,6 @@
                 $('#submitBtn').prop('disabled', false);
             }
         });
-
-
-
         document.addEventListener('DOMContentLoaded', function() {
             const masterUangModals = document.getElementById('masteruangmodals');
             const totalHarga = document.getElementById('totalHarga');
@@ -232,6 +269,4 @@
             });
         });
     });
-
 </script>
-

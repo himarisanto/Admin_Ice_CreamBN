@@ -17,20 +17,15 @@ return new class extends Migration
             $table->string('gambar_produk')->nullable();
             $table->string('nama_produk');
             $table->unsignedBigInteger('satuan_id')->nullable();
-            // $table->unsigne('harga_beli');
-            $table->unsignedFloat("harga_beli");
-            // $table->unsignedBigInteger('harga_jual');
-            // $table->decimal('harga_jual',15,2)->unsigned()->default(0)->change();
-            $table->unsignedFloat("harga_jual");
-
-
+            $table->decimal("harga_beli", 20, 10);
+            $table->decimal("harga_jual", 20, 10);
             $table->unsignedBigInteger('stok')->default(0);
             $table->string('keterangan')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
+    /**x
      * Reverse the migrations.
      */
     public function down(): void

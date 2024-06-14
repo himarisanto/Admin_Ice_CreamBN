@@ -54,8 +54,8 @@ class IceController extends Controller
 
         $satuans = Satuan::all();
         return view('eskrim.index', compact('ices', 'satuans', 'searchKeyword', 'hasResults', 'searchMessage', 'entries'));
-
     }
+
     public function store(Request $req)
     {
         $req->validate([
@@ -89,11 +89,7 @@ class IceController extends Controller
 
         // Membersihkan format harga beli dan harga jual
         $hargaBeli = str_replace(",", ".", str_replace('.', '', $req['harga_beli']));
-        // dd((float) $hargaBeli);
-        // dd( $hargaBeli);
         $hargaJual = str_replace(",", ".", str_replace('.', '', $req['harga_jual']));
-
-        // $hargaJual = str_replace('.', '', $req['harga_jual']);
 
         Ice::create([
             'kode_produk'   => $req['kode_produk'],
@@ -107,6 +103,7 @@ class IceController extends Controller
 
         return redirect()->back()->with('message', 'Data produk berhasil disimpan.');
     }
+
 
 
     public function update(Request $req, $id)

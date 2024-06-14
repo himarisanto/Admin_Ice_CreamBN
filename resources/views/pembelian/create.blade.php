@@ -51,27 +51,14 @@
                                 @foreach ($produks as $ices)
                                 <option value="{{ $ices->kode_produk ?? '-' }}"
                                     data-nama-produk="{{ $ices->nama_produk ?? '-' }}"
-                                    data-harga-beli="{{ number_format($ices->harga_beli, 0, ',', '.') }}"
+                                    data-harga-beli="{{ number_format($ices->harga_beli, 0, ',', ',') }}"
+                                    data-original-harga-beli="{{ $ices->harga_beli }}"
                                     data-gambar="{{ $ices->gambar_produk ?? '-' }}"
                                     data-stok-produk="{{ $ices->stok ?? '-' }}">
                                     {{ $ices->kode_produk ?? '-' }} - {{ $ices->nama_produk ?? '-' }}
                                 </option>
                                 @endforeach
                             </select>
-
-                            {{-- <select class="form-control select2" id="kode_produk" name="kode_produk" required>
-                                <option selected disabled value="">Pilih Kode Produk</option>
-                                @foreach ($produks as $ices)
-                                <option value="{{ $ices->kode_produk ?? '-' }}"
-                                    data-nama-produk="{{ $ices->nama_produk ?? '-' }}"
-                                    data-harga-beli="{{ number_format($ices->harga_beli, 0, ',', '.') }}"
-                                    data-gambar="{{ $ices->gambar_produk ?? '-' }}"
-                                    data-stok-produk="{{ $ices->stok ?? '-' }}">
-                                    {{ $ices->kode_produk ?? '-' }} - {{ $ices->nama_produk ?? '-' }}
-                                </option>
-                                @endforeach
-                            </select> --}}
-
                         </div>
                     </div>
                     <div class="row mb-2">
