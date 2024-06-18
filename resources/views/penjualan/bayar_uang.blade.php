@@ -1,16 +1,17 @@
 <!-- Modal -->
-<div class="modal fade" id="modalBayarUang-{{ $item->id }}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="modalBayarUang-{{ $item->id }}" data-bs-backdrop="static" data-bs-keyboard="false"
+    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="staticBackdropLabel">Sisa Hutang = Rp
                     @php
-                        $totalPembayaran = $item->bayarHutangs->sum('bayar');
-                        $sisaHutang = $item->grand_total - $totalPembayaran;
+                    $totalPembayaran = $item->bayarHutangs->sum('bayar');
+                    $sisaHutang = $item->grand_total - $totalPembayaran;
                     @endphp
                     {{ number_format($sisaHutang, 0, ',', '.') }}
-                </h1>
 
+                </h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -18,7 +19,8 @@
                     @csrf
                     <div class="mb-1">
                         <label for="tanggal_transaksi" class="form-label">Tanggal Transaksi :</label>
-                        <input id="tanggal_transaksi" type="date" class="form-control" name="tanggal_transaksi" required>
+                        <input id="tanggal_transaksi" type="date" class="form-control" name="tanggal_transaksi"
+                            required>
                         <input type="hidden" name="penjualan_id" value="{{ $item->id }}">
                     </div>
                     <div class="mb-1">
